@@ -49,15 +49,15 @@ This project implements a complete **audio recording and processing system** usi
 ---
 
 ## 📁 Folder Structure
-.
-├── recorder_utils.py # CLI with UART control, data saving, and playback
-├── test.py # Test script with dummy data (no STM32 needed)
-├── convert_to_wav.exe # C-based executable to convert .data → .wav
-├── output_raw_data/ # Binary recordings
-├── output_raw_data_csv/ # CSVs (timestamp + amplitude)
-├── output_audio/ # Converted .wav files
-├── amplitude_plot/ # Amplitude vs time plots (.png)
-.
+
+- recorder_utils.py # CLI with UART control, data saving, and playback
+- test.py # Test script with dummy data (no STM32 needed)
+- convert_to_wav.exe # C-based executable to convert .data → .wav
+- output_raw_data/ # Binary recordings
+- output_raw_data_csv/ # CSVs (timestamp + amplitude)
+- output_audio/ # Converted .wav files
+- amplitude_plot/ # Amplitude vs time plots (.png)
+
 ---
 
 ## 🚀 How to Use
