@@ -57,7 +57,7 @@ This project implements a complete **audio recording and processing system** usi
 ├── output_raw_data_csv/ # CSVs (timestamp + amplitude)
 ├── output_audio/ # Converted .wav files
 ├── amplitude_plot/ # Amplitude vs time plots (.png)
-
+.
 ---
 
 ## 🚀 How to Use
