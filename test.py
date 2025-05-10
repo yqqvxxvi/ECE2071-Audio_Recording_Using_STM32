@@ -94,7 +94,6 @@ def full_test():
     print("[TEST] Test complete.\n")
     print(f"[FILES GENERATED]\n - Binary: {binary_file}\n - CSV: {csv_file}\n - Plot: {plot_file}\n - WAV: {wav_file}\n")
 
-    # Optional: call the interactive playback menu
     playback_menu()
 
 if __name__ == "__main__":

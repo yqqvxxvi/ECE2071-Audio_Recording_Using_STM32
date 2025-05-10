@@ -11,7 +11,7 @@ Written on: 08/05/2025
 Description: Completed the code to handle the conversion of raw data to WAV format and playback options.
             Added functions to handle the conversion of raw data to WAV format and playback options. 
             TODO: Add function headers and comments for clarity.
-                Write a test.py to use dummy data to test the conversion and playback functions.
+                
 
 File Header:
 
@@ -35,10 +35,21 @@ CHUNK_SIZE = None # Read in chunks of 500 bytes
 
 def get_new_filename():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    raw_filename = os.path.join("output_raw_data", f"recording_{timestamp}.data")
-    wav_filename = os.path.join("output_audio", f"recorded_audio_{timestamp}.wav")
-    csv_filename = os.path.join("output_raw_data_csv", f"recording_{timestamp}.csv")
-    plot_filename = os.path.join("amplitude_plot", f"recording_{timestamp}.png")
+    raw_folder = "output_raw_data"
+    audio_folder = "output_audio"
+    csv_folder = "output_raw_data_csv"
+    plot_folder = "amplitude_plot"
+
+    # Ensure all output folders exist
+    os.makedirs(raw_folder, exist_ok=True)
+    os.makedirs(audio_folder, exist_ok=True)
+    os.makedirs(csv_folder, exist_ok=True)
+    os.makedirs(plot_folder, exist_ok=True)
+
+    raw_filename = os.path.join(raw_folder, f"recording_{timestamp}.data")
+    wav_filename = os.path.join(audio_folder, f"recorded_audio_{timestamp}.wav")
+    csv_filename = os.path.join(csv_folder, f"recording_{timestamp}.csv")
+    plot_filename = os.path.join(plot_folder, f"recording_{timestamp}.png")
     
     print(f"Generated filenames: {raw_filename}, {wav_filename}, {csv_filename}, {plot_filename}\n")
     return raw_filename, wav_filename, csv_filename, plot_filename
@@ -60,8 +71,7 @@ def receiving_data(ser, binary_filename, csv_filename, plot_filename , sample_ra
     with open(binary_filename, "ab") as bin_file, open(csv_filename, "w") as csv_file:
         writer = csv.writer(csv_file)
         
-        writer.writerow(["SampleRate(Hz)", sample_rate])
-        writer.writerow(["Time (s)", "Amplitude (V)"]) #header
+        writer.writerow([sample_rate])
         
         while True:
             try:
@@ -73,7 +83,7 @@ def receiving_data(ser, binary_filename, csv_filename, plot_filename , sample_ra
                     # Extract 12-bit ADC samples (each sample = 2 bytes, little endian)
                     for i in range(0, len(chunk) - 1, 2):
                         adc_val = chunk[i] | (chunk[i + 1] << 8) # decode binary data to 12-bit ADC value manually
-                        writer.writerow(adc_val) # write to CSV file
+                        writer.writerow([adc_val]) # write to CSV file
                         amplitude = adc_to_amplitude(adc_val)
                         timestamp = sample_index / sample_rate
                         amplitude_list.append(amplitude)
@@ -85,6 +95,7 @@ def receiving_data(ser, binary_filename, csv_filename, plot_filename , sample_ra
             except KeyboardInterrupt:
                 print("[INFO] Recording interrupted by user.\n")
                 break
+            
         plot_data(amplitude_list, amplitude_time, plot_filename) # plot the data
         print(f"[INFO] Recording finished. Total bytes read: {bytes_read}\n")
         print(f"[INFO] Data saved as {binary_filename} in 'output_raw_data' folder\n")
@@ -111,8 +122,7 @@ def convert_to_wav(input_file, output_file):
         print(f"[ERROR] Input file '{input_file}' does not exist.")
         return
     
-    # teammates might use cross-platform tools, so need to check the OS
-    exe = "./convert_to_wav.exe" if os.name != "nt" else "convert_to_wav.exe"
+    exe = "convert_to_wav.exe"
 
     print(f"[INFO] Running: {exe} {input_file} {output_file}")
     result = subprocess.getstatusoutput(f"{exe} {input_file} {output_file}")
@@ -133,21 +143,24 @@ def manual_mode(ser):
     cmd = f"manual_{duration_sec:02d}"
     send_command(ser, cmd)
 
-    raw_file, wav_file = get_new_filename()
-    receiving_data(ser, raw_file)
+    raw_file, wav_file, csv_file, plot_file = get_new_filename()
+    receiving_data(ser, raw_file, csv_file, plot_file)
     convert_to_wav(raw_file, wav_file)
+    send_command(ser, "interrupt")
 
 def distance_mode(ser):
     send_command(ser, "resume   ")
-    print("[INFO] Distance trigger mode activated. Will stop if the distance is further than 10cm for 5 seconds.\n")
-    print("[INFO] Or press Ctrl + C to stop recording.\n")
+    print("[INFO] Distance trigger mode activated. \n")
+    print("[INFO] Press Ctrl + C to stop recording.\n")
 
-    raw_file, wav_file = get_new_filename()
-    receiving_data(ser, raw_file)
+    raw_file, wav_file, csv_file, plot_file = get_new_filename()
+    receiving_data(ser, raw_file, csv_file, plot_file)
     convert_to_wav(raw_file, wav_file)
+    send_command(ser, "interrupt")
 
 def interrupt(ser):
     send_command(ser, "interrupt")
+    receiving_data()
     
 def play_audio_file(filepath):
     system = platform.system()
