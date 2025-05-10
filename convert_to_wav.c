@@ -5,7 +5,7 @@ It reads the ADC data, converts it to PCM format, and writes it to a WAV file wi
 
 version 1.0:
 Written by: Liew You Qing 33590400
-Written on: 23/04/2025
+Written on: 23/03/2025
 
 version 1.0.5:
 Last modified by: Liew You Qing 33590400
@@ -13,6 +13,11 @@ Last modified on: 07/04/2025
 Description: Added error handling for file operations and memory allocation.
             Added comments.
             Added a function to write the WAV header.
+
+version 1.1.0:
+Last modified by: Naamjas Singh 34392017
+Last modified on: 10/04/2025
+Description: Added comments and function headers. 
 */
 
 #include <stdio.h>
@@ -27,9 +32,13 @@ Description: Added error handling for file operations and memory allocation.
 #define NUM_CHANNELS    1
 #define HEADER_SIZE     44
 
+//Declare function protypes
+//Function takes in a pointer to a file, and an integer value for the size of the file in bytes
 void write_wav_header(FILE *fp, int data_size);
 
+//main function
 int main(int argc, char *argv[]) {
+    //check for valid number of arguments in command line
     if (argc < 3) {
         fprintf(stderr, "Usage: %s <input_file> <output_wav_file>\n", argv[0]);
         return 1;
@@ -38,7 +47,8 @@ int main(int argc, char *argv[]) {
     const char *input_filename = argv[1];
     const char *output_filename = argv[2];
 
-    FILE *input = fopen(input_filename, "rb");
+    //Opens file in read only, binary mode
+    FILE *input = fopen(input_filename, "rb"); 
     if (!input) {
         perror("Error opening input file");
         return 1;
@@ -69,12 +79,14 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
+    //WAV Header and Data Conversion
     int num_samples = file_size / 2;  // 2 bytes per 12-bit ADC sample (sent as two bytes)
     write_wav_header(output, num_samples * 2); // 2 bytes per PCM sample
 
+    //Converts ADC to PCM (scale) and write
     for (int i = 0; i < num_samples; i++) {
         uint16_t raw = adc_data[2*i] | (adc_data[2*i + 1] << 8);  // Little-endian 12-bit
-        int16_t pcm = (int16_t)(((int32_t)raw * (PCM_MAX - PCM_MIN)) / ADC_MAX + PCM_MIN);
+        int16_t pcm = (int16_t)(((int32_t)raw * (PCM_MAX - PCM_MIN)) / ADC_MAX + PCM_MIN); //makes midpoint of ADC range into PCM 0
         fwrite(&pcm, sizeof(int16_t), 1, output);
     }
 
@@ -85,7 +97,23 @@ int main(int argc, char *argv[]) {
 }
 
 
+/*
+Function takes in a pointer to a file and writes the wav. file header into the file.
 
+Parameters: 
+FILE *fp: pointer to a file 
+int data_size: Size of file in bytes (data is of type integer)
+
+Returns: 
+None.
+
+Note: 
+Function writes into the file pointed to by the file pointer (1st function argument)
+
+Example usage:
+    FILE *fp = fopen("audio.wav", "wb")     //write access to file in binary
+    write_wav_header(fp, 80000)
+*/
 void write_wav_header(FILE *fp, int data_size) {
     int byte_rate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
     int block_align = NUM_CHANNELS * BITS_PER_SAMPLE / 8;
@@ -97,6 +125,7 @@ void write_wav_header(FILE *fp, int data_size) {
     fwrite("WAVE", 1, 4, fp);
     fwrite("fmt ", 1, 4, fp);
 
+    //Declare variables used
     uint32_t subchunk1_size = 16;
     uint16_t audio_format = 1;
     uint16_t num_channels = NUM_CHANNELS;
