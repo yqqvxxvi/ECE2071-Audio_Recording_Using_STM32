@@ -19,11 +19,11 @@ Written on: 09/05/2025
 Description: Added function headers to explain functions
             Edited playback_menu function to continously show menu after playing song until user quit
             Edited show_menu function to display error message for wrong input
-            TODO: make distance for distance_mode a custom input from user (as per task 2 requirements)
-            TODO: Write test.py to use dummy data to test the conversion and playback function
+            TODO: make distance for distance_mode a custom input from user 
+            (send byte of distance to be used and tell processing stm to stop sending data via loop when user outside range)
 
 File Header:
-
+            Main file and CLI that user interacts with. Functions are called within this file and outputs (graphs + audios etc) are outputted from this file. 
 '''
 #import modules to be used
 import serial
