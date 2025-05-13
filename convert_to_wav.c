@@ -17,8 +17,13 @@ Description: Added error handling for file operations and memory allocation.
 version 1.1.0:
 Last modified by: Naamjas Singh 34392017
 Last modified on: 10/04/2025
-Description: Added comments and function headers. . 
+Description: Added comments and function headers.
             TODO Change sample rate for task 3 
+
+version 1.1.1:
+Last modified by: Ruoyu Zhang 34619224
+Last modified on: 13/05/2025
+Description: Modified comments and function headers.
 */
 
 #include <stdio.h>
@@ -99,22 +104,29 @@ int main(int argc, char *argv[]) {
 
 
 /*
-Function takes in a pointer to a file and writes the wav. file header into the file.
+Function: write_wav_header
 
-Parameters: 
-FILE *fp: pointer to a file 
-int data_size: Size of file in bytes (data is of type integer)
+Description:
+    Writes a standard 44-byte WAV file header to a file stream, using the specified
+    audio data size. This header is required for PCM WAV files to be correctly 
+    interpreted by audio players.
 
-Returns: 
-None.
+Parameters:
+    FILE *fp        - Pointer to an already open file stream (binary write mode recommended)
+    int data_size   - Size of the PCM audio data in bytes (not including the header)
 
-Note: 
-Function writes into the file pointed to by the file pointer (1st function argument)
+Returns:
+    This function does not return a value.
+
+Note:
+    The function assumes the file pointer `fp` is valid and opened for binary writing.
+    It writes the RIFF, fmt, and data chunks required for basic PCM WAV format.
 
 Example usage:
-    FILE *fp = fopen("audio.wav", "wb")     //write access to file in binary
-    write_wav_header(fp, 80000)
+    FILE *fp = fopen("audio.wav", "wb"); // Write access to file in binary mode
+    write_wav_header(fp, 80000);
 */
+
 void write_wav_header(FILE *fp, int data_size) {
     int byte_rate = SAMPLE_RATE * NUM_CHANNELS * BITS_PER_SAMPLE / 8;
     int block_align = NUM_CHANNELS * BITS_PER_SAMPLE / 8;
